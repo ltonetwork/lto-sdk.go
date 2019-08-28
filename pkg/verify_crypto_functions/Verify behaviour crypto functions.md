@@ -12,4 +12,7 @@ Make sure the crypto functions in Golang have the exact same behaviour as the on
   * hashing
 * blake2b
   * hashing
+* ed25519
+  * sign
+  * verify
 
