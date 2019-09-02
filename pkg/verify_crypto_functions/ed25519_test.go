@@ -64,3 +64,29 @@ func TestED25519Verify(t *testing.T) {
 		})
 	}
 }
+
+func TestED25519GenerateKeyPair(t *testing.T) {
+	cases := map[string]struct {
+		Seed               []byte
+		ExpectedPrivateKey []byte
+		ExpectedPublicKey  []byte
+	}{
+		"ed25519 generate  keypair": {
+			[]byte{55, 181, 186, 216, 187, 44, 101, 98, 127, 239, 227, 108, 5, 144, 206, 151, 98, 210, 109, 209, 119, 58, 223, 38, 75, 187, 111, 54, 125, 51, 13, 242},
+			[]byte{55, 181, 186, 216, 187, 44, 101, 98, 127, 239, 227, 108, 5, 144, 206, 151, 98, 210, 109, 209, 119, 58, 223, 38, 75, 187, 111, 54, 125, 51, 13, 242, 61, 213, 238, 0, 41, 141, 6, 162, 215, 211, 167, 67, 31, 195, 241, 91, 150, 246, 163, 108, 4, 163, 122, 144, 65, 193, 49, 223, 11, 86, 79, 131},
+			[]byte{61, 213, 238, 0, 41, 141, 6, 162, 215, 211, 167, 67, 31, 195, 241, 91, 150, 246, 163, 108, 4, 163, 122, 144, 65, 193, 49, 223, 11, 86, 79, 131},
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			privateKey, publicKey := verify_crypto_functions.ED25519GenerateKeyPair(tc.Seed)
+
+			require.Equal(t, tc.ExpectedPrivateKey, privateKey)
+			require.Equal(t, tc.ExpectedPublicKey, publicKey)
+
+			fmt.Printf("private key: %v\n", privateKey)
+			fmt.Printf("public key: %v\n", publicKey)
+		})
+	}
+}
