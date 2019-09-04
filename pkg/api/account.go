@@ -27,7 +27,7 @@ type Account struct {
 	/**
 	 * LTO Wallet Address
 	 */
-	Address string
+	Address []byte
 
 	/**
 	 * Seed phrase
@@ -44,7 +44,7 @@ type Account struct {
  * Create an event chain
  */
 func (a *Account) CreateEventChain(nonce []byte) (*EventChain, error) {
-	eventChain := NewEventChain("")
+	eventChain := NewEventChain(nil)
 	err := eventChain.Init(a, nonce)
 	if err != nil {
 		return nil, err

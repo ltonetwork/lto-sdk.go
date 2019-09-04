@@ -1,19 +1,18 @@
 package api
 
 import (
-	"github.com/btcsuite/btcutil/base58"
 	"github.com/ltonetwork/lto-sdk.go/pkg/crypto"
 )
 import "crypto/rand"
 
-func NewEventChain(id string) *EventChain {
+func NewEventChain(id []byte) *EventChain {
 	return &EventChain{
 		ID: id,
 	}
 }
 
 type EventChain struct {
-	ID     string
+	ID     []byte
 	Events []*Event
 }
 
@@ -30,13 +29,13 @@ func (e *EventChain) Init(account *Account, nonce []byte) error {
 	return nil
 }
 
-func (e *EventChain) CreateProjectionID(nonce []byte) (string, error) {
+func (e *EventChain) CreateProjectionID(nonce []byte) ([]byte, error) {
 	nonceBytes, err := e.getNonceBytes(nonce)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return crypto.BuildEventChainID(ProjectionAddressVersion, []byte(e.ID), nonceBytes), nil
+	return crypto.BuildEventChainID(ProjectionAddressVersion, e.ID, nonceBytes), nil
 }
 
 func (e *EventChain) AddEvent(event *Event) *Event {
@@ -48,7 +47,7 @@ func (e *EventChain) AddEvent(event *Event) *Event {
 
 func (e *EventChain) GetLatestHash() string {
 	if len(e.Events) == 0 {
-		return crypto.BuildHash(base58.Decode(e.ID))
+		return crypto.BuildHash(e.ID)
 	}
 
 	event := e.Events[len(e.Events)-1]

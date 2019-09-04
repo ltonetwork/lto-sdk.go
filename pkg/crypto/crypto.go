@@ -36,14 +36,14 @@ func hashChain(input []byte) []byte {
 	return Sha256(Blake2b(input))
 }
 
-func BuildRawAddress(publicKeyBytes []byte, networkByte byte) string {
+func BuildRawAddress(publicKeyBytes []byte, networkByte byte) []byte {
 	prefix := []byte{AddressVersion, networkByte}
 	publicKeyHashPart := hashChain(publicKeyBytes)[0:20]
 
 	rawAddress := append(prefix, publicKeyHashPart...)
 	addressHash := hashChain(rawAddress)[0:4]
 
-	return Base58Encode(append(rawAddress, addressHash...))
+	return append(rawAddress, addressHash...)
 }
 
 func CreateSignature(input []byte, privateKey []byte) ([]byte, error) {
@@ -66,15 +66,40 @@ func VerifySignature(input []byte, signature []byte, publicKey []byte) (bool, er
 	return ED25519Verify(publicKey, input, signature), nil
 }
 
-func BuildEventChainID(prefix byte, publicKey []byte, randomBytes []byte) string {
+func BuildEventChainID(prefix byte, publicKey []byte, randomBytes []byte) []byte {
 	publicKeyHashPart := hashChain(publicKey)
 	rawID := append([]byte{prefix}, randomBytes...)
 	rawID = append(rawID, publicKeyHashPart...)
 	addressHash := hashChain(rawID)[0:4]
 
-	return Base58Encode(append(rawID, addressHash...))
+	return append(rawID, addressHash...)
 }
 
 func BuildHash(eventBytes []byte) string {
 	return Base58Encode(Sha256(eventBytes))
+}
+
+func BuildNACLSignKeyPairFromSecret(privateKey []byte) *KeyPair {
+	return &KeyPair{
+		PublicKey:  ed25519.PrivateKey(privateKey).Public().(ed25519.PublicKey),
+		PrivateKey: privateKey,
+	}
+}
+
+func IsValidAddress(address []byte, networkByte byte) bool {
+	if len(address) < 2 || address[0] != AddressVersion || address[1] != networkByte {
+		return false
+	}
+
+	key := address[0:22]
+	check := address[22:26]
+	keyHash := hashChain(key)[0:4]
+
+	for i := 0; i < 4; i++ {
+		if check[i] != keyHash[i] {
+			return false
+		}
+	}
+
+	return true
 }
