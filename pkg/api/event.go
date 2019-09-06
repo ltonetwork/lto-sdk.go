@@ -8,6 +8,10 @@ import (
 	"github.com/ltonetwork/lto-sdk.go/pkg/crypto"
 )
 
+const TimeFormat = "2006-01-02T15:04:05-07:00"
+
+//const TimeFormat = time.RFC3339
+
 func NewEvent(body interface{}, previous string) (*Event, error) {
 	event := &Event{
 		Timestamp: time.Now().Unix(),
@@ -69,7 +73,7 @@ func (e *Event) GetHash() string {
 }
 
 func (e *Event) GetMessage() []byte {
-	return []byte(fmt.Sprintf("%s\n%d\n%s\n%s\n", e.Body, e.Timestamp, e.Previous, e.SignKey))
+	return []byte(fmt.Sprintf("%s\n%d\n%s\n%s", e.Body, e.Timestamp, e.Previous, crypto.Base58Encode(e.SignKey)))
 }
 
 func (e *Event) GetResourceVersion() string {
