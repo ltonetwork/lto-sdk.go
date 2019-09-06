@@ -1,8 +1,6 @@
 package api
 
 import (
-	"crypto/rand"
-
 	"github.com/ltonetwork/lto-sdk.go/pkg/crypto"
 )
 

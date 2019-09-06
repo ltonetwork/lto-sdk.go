@@ -1,7 +1,7 @@
 package api
 
 import (
-	"crypto/rand"
+	cryptorand "crypto/rand"
 	"math/big"
 	"strings"
 
@@ -77,6 +77,10 @@ type LTOBasicConfig struct {
  * Creates an account based on a random seed
  */
 func (lto *LTO) CreateAccount(words int) (*Account, error) {
+	if words == 0 {
+		words = 15
+	}
+
 	if words < lto.Config.MinimumSeedLength {
 		return nil, errors.Errorf("seed must have a length of at least %d", lto.Config.MinimumSeedLength)
 	}
@@ -95,7 +99,7 @@ func generateNewSeed(length int) ([]byte, error) {
 	words := make([]string, length)
 
 	for i := 0; i < length; i++ {
-		randomBigInt, err := rand.Int(rand.Reader, big.NewInt(int64(dictionarySize)))
+		randomBigInt, err := cryptorand.Int(rand, big.NewInt(int64(dictionarySize)))
 		if err != nil {
 			return nil, err
 		}

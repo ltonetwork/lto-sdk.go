@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/ltonetwork/lto-sdk.go/pkg/crypto"
 )
-import "crypto/rand"
 
 func NewEventChain(id []byte) *EventChain {
 	return &EventChain{

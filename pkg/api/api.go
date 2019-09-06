@@ -4,9 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	cryptorand "crypto/rand"
+
 	"github.com/ltonetwork/lto-sdk.go/pkg/crypto"
 	"github.com/unchainio/pkg/xapi"
 )
+
+var rand = cryptorand.Reader
 
 func NewAPI(config *LTOConfig) (*API, error) {
 	client, err := xapi.NewClient(config.NodeAddress)
