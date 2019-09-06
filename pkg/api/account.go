@@ -5,6 +5,10 @@ import (
 )
 
 func NewAccount(phrase []byte, networkByte byte) (*Account, error) {
+	if networkByte == 0 {
+		networkByte = MainNetByte
+	}
+
 	if len(phrase) != 0 {
 		keys, err := crypto.BuildNACLSignKeyPair(phrase)
 		if err != nil {
