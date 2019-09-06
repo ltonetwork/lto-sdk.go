@@ -115,6 +115,7 @@ func (lto *LTO) CreateAccountFromExistingPhrase(phrase []byte) (*Account, error)
 	if len(phrase) < lto.Config.MinimumSeedLength {
 		return nil, errors.Errorf("seed must have a length of at least %d", lto.Config.MinimumSeedLength)
 	}
+	//fmt.Printf("phrase = ('%v')\n", phrase)
 
 	account, err := NewAccount(phrase, lto.NetworkByte)
 	if err != nil {

@@ -12,6 +12,9 @@ func NewAccount(phrase []byte, networkByte byte) (*Account, error) {
 		if err != nil {
 			return nil, err
 		}
+		//
+		//fmt.Printf("privateKey = ('%v')\n", keys.PrivateKey)
+		//fmt.Printf("publicKey = ('%v')\n", keys.PublicKey)
 
 		return &Account{
 			Address: crypto.BuildRawAddress(keys.PublicKey, networkByte),
@@ -20,7 +23,7 @@ func NewAccount(phrase []byte, networkByte byte) (*Account, error) {
 		}, nil
 	}
 
-	return nil, nil
+	return &Account{}, nil
 }
 
 type Account struct {

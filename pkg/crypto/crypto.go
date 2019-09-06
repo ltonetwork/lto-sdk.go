@@ -1,46 +1,70 @@
 package crypto
 
 import (
+	"bytes"
+	"encoding/binary"
+
 	"github.com/pkg/errors"
 
 	"golang.org/x/crypto/ed25519"
 )
 
 func BuildNACLSignKeyPair(seed []byte) (*KeyPair, error) {
+	//fmt.Printf("seedBytes = ('%v')\n", seed)
+
 	seedHash, err := buildSeedHash(seed)
 	if err != nil {
 		return nil, err
 	}
+	//fmt.Printf("seedHash = ('%v')\n", seedHash)
 
 	privateKey := ed25519.NewKeyFromSeed(seedHash)
 
 	return &KeyPair{
-		PublicKey:  privateKey,
-		PrivateKey: privateKey.Public().(ed25519.PublicKey),
+		PrivateKey: privateKey,
+		PublicKey:  privateKey.Public().(ed25519.PublicKey),
 	}, nil
 }
 
-const InitialNonce = 0
+const InitialNonce int32 = 0
 const AddressVersion byte = 0x1
 const PrivateKeyLength = 64
 const PublicKeyLength = 32
 const SignatureLength = 64
 
 func buildSeedHash(seed []byte) ([]byte, error) {
-	seedBytesWithNonce := append(seed, InitialNonce)
+	nonce := new(bytes.Buffer)
+
+	err := binary.Write(nonce, binary.BigEndian, InitialNonce)
+	if err != nil {
+		return nil, err
+	}
+	//fmt.Printf("nonce = ('%v')\n", nonce.Bytes())
+
+	seedBytesWithNonce := append(nonce.Bytes(), seed...)
+	//fmt.Printf("seedBytesWithNonce = ('%v')\n", seedBytesWithNonce)
+
 	seedHash := hashChain(seedBytesWithNonce)
 	return Sha256(seedHash), nil
 }
 
 func hashChain(input []byte) []byte {
-	return Sha256(Blake2b(input))
+	res := Sha256(Blake2b(input))
+
+	return res
 }
 
 func BuildRawAddress(publicKeyBytes []byte, networkByte byte) []byte {
 	prefix := []byte{AddressVersion, networkByte}
-	publicKeyHashPart := hashChain(publicKeyBytes)[0:20]
-
+	publicKeyHashPart := hashChain(publicKeyBytes)
+	//fmt.Printf("hashChain('%v') = '%v'\n", Base58Encode(publicKeyBytes), Base58Encode(publicKeyHashPart))
+	publicKeyHashPart = publicKeyHashPart[0:20]
 	rawAddress := append(prefix, publicKeyHashPart...)
+	//fmt.Printf("publicKeyBytes = ('%v')\n", publicKeyBytes)
+	//fmt.Printf("hashChain(publicKeyBytes) = ('%v')\n", hashChain(publicKeyBytes))
+	//fmt.Printf("prefix = ('%v')\n", prefix)
+	//fmt.Printf("publicKeyHashPart = ('%v')\n", publicKeyHashPart)
+	//fmt.Printf("rawAddress = ('%v')\n", rawAddress)
 	addressHash := hashChain(rawAddress)[0:4]
 
 	return append(rawAddress, addressHash...)
@@ -67,7 +91,7 @@ func VerifySignature(input []byte, signature []byte, publicKey []byte) (bool, er
 }
 
 func BuildEventChainID(prefix byte, publicKey []byte, randomBytes []byte) []byte {
-	publicKeyHashPart := hashChain(publicKey)
+	publicKeyHashPart := hashChain(publicKey)[0:20]
 	rawID := append([]byte{prefix}, randomBytes...)
 	rawID = append(rawID, publicKeyHashPart...)
 	addressHash := hashChain(rawID)[0:4]
