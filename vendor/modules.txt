@@ -1,0 +1,22 @@
+# github.com/btcsuite/btcutil v0.0.0-20190425235716-9e5f4b9a998d
+github.com/btcsuite/btcutil/base58
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/stretchr/testify v1.4.0
+github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
+# github.com/unchainio/pkg v0.20.1
+github.com/unchainio/pkg/errors
+github.com/unchainio/pkg/xapi
+# golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586
+golang.org/x/crypto/blake2b
+golang.org/x/crypto/ed25519
+golang.org/x/crypto/ed25519/internal/edwards25519
+# golang.org/x/sys v0.0.0-20190826190057-c7b8b68b1456
+golang.org/x/sys/cpu
+# gopkg.in/yaml.v2 v2.2.2
+gopkg.in/yaml.v2
