@@ -1,4 +1,4 @@
-package api
+package lto
 
 import (
 	"testing"
@@ -12,7 +12,7 @@ import (
 
 func TestAPI_Balance(t *testing.T) {
 	type fields struct {
-		config *LTOConfig
+		config *Config
 	}
 	type args struct {
 		confirmations int
@@ -26,7 +26,7 @@ func TestAPI_Balance(t *testing.T) {
 		{
 			name: "",
 			fields: fields{
-				config: DefaultTestNetConfig,
+				config: DefaultTestNetConfig(),
 			},
 			want: &BalanceResponse{
 				Confirmations: 0,
@@ -40,10 +40,10 @@ func TestAPI_Balance(t *testing.T) {
 			api, err := NewAPI(tt.fields.config)
 			require.NoError(t, err)
 
-			lto, err := NewLTO(TestNetByte, "")
+			lto, err := NewClient().WithNetwork(NetworkTest).Create()
 			require.NoError(t, err)
 
-			a, err := lto.CreateAccount(15)
+			a, err := lto.NewAccount().Create()
 			require.NoError(t, err)
 
 			spew.Dump(a.Address)
@@ -65,7 +65,7 @@ func TestAPI_Balance(t *testing.T) {
 
 func TestAPI_BalanceWithConfirmations(t *testing.T) {
 	type fields struct {
-		config *LTOConfig
+		config *Config
 	}
 	type args struct {
 		confirmations int
@@ -79,7 +79,7 @@ func TestAPI_BalanceWithConfirmations(t *testing.T) {
 		{
 			name: "",
 			fields: fields{
-				config: DefaultTestNetConfig,
+				config: DefaultTestNetConfig(),
 			},
 			want: &BalanceResponse{
 				Confirmations: 0,
@@ -93,10 +93,10 @@ func TestAPI_BalanceWithConfirmations(t *testing.T) {
 			api, err := NewAPI(tt.fields.config)
 			require.NoError(t, err)
 
-			lto, err := NewLTO(TestNetByte, "")
+			lto, err := NewClient().WithNetwork(NetworkTest).Create()
 			require.NoError(t, err)
 
-			a, err := lto.CreateAccount(15)
+			a, err := lto.NewAccount().Create()
 			require.NoError(t, err)
 
 			spew.Dump(a.Address)
@@ -118,7 +118,7 @@ func TestAPI_BalanceWithConfirmations(t *testing.T) {
 
 func TestAPI_BalanceDetails(t *testing.T) {
 	type fields struct {
-		config *LTOConfig
+		config *Config
 	}
 	type args struct {
 		confirmations int
@@ -132,7 +132,7 @@ func TestAPI_BalanceDetails(t *testing.T) {
 		{
 			name: "",
 			fields: fields{
-				config: DefaultTestNetConfig,
+				config: DefaultTestNetConfig(),
 			},
 			want: &BalanceResponse{
 				Confirmations: 0,
@@ -146,10 +146,10 @@ func TestAPI_BalanceDetails(t *testing.T) {
 			api, err := NewAPI(tt.fields.config)
 			require.NoError(t, err)
 
-			lto, err := NewLTO(TestNetByte, "")
+			lto, err := NewClient().WithNetwork(NetworkTest).Create()
 			require.NoError(t, err)
 
-			a, err := lto.CreateAccount(15)
+			a, err := lto.NewAccount().Create()
 			require.NoError(t, err)
 
 			spew.Dump(a.Address)

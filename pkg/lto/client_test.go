@@ -1,4 +1,4 @@
-package api
+package lto
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 
 func TestLTO_CreateAccount(t *testing.T) {
 	type fields struct {
-		NetworkByte byte
+		Network Network
 	}
 	type args struct {
 		words int
@@ -30,7 +30,7 @@ func TestLTO_CreateAccount(t *testing.T) {
 		{
 			name: "should return true for a valid address",
 			fields: fields{
-				NetworkByte: MainNetByte,
+				Network: NetworkMain,
 			},
 			args: args{
 				words: 0,
@@ -41,7 +41,7 @@ func TestLTO_CreateAccount(t *testing.T) {
 		{
 			name: "should return false for an invalid address",
 			fields: fields{
-				NetworkByte: MainNetByte,
+				Network: NetworkMain,
 			},
 			args: args{
 				words: 15,
@@ -52,10 +52,16 @@ func TestLTO_CreateAccount(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			lto, err := NewLTO(tt.fields.NetworkByte, "")
+			lto, err := NewClient().WithNetwork(tt.fields.Network).Create()
 			require.NoError(t, err)
 
-			got, err := lto.CreateAccount(tt.args.words)
+			p := lto.NewAccount()
+
+			if tt.args.words != 0 {
+				p = p.FromRandomN(tt.args.words)
+			}
+			got, err := p.Create()
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CreateAccount() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -71,10 +77,10 @@ func TestLTO_CreateAccount(t *testing.T) {
 
 func TestLTO_CreateAccountFromExistingPhrase(t *testing.T) {
 	type fields struct {
-		NetworkByte byte
+		Network Network
 	}
 	type args struct {
-		phrase []byte
+		Seed []byte
 	}
 	tests := []struct {
 		name    string
@@ -84,12 +90,12 @@ func TestLTO_CreateAccountFromExistingPhrase(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "should create an account with from an existing seed",
+			name: "should create an Account with from an existing seed",
 			fields: fields{
-				NetworkByte: MainNetByte,
+				Network: NetworkMain,
 			},
 			args: args{
-				phrase: []byte("manage manual recall harvest series desert melt police rose hollow moral pledge kitten position add"),
+				Seed: []byte("manage manual recall harvest series desert melt police rose hollow moral pledge kitten position add"),
 			},
 			want: &Account{
 				Address: crypto.Base58Decode("3JmCa4jLVv7Yn2XkCnBUGsa7WNFVEMxAfWe"),
@@ -101,12 +107,12 @@ func TestLTO_CreateAccountFromExistingPhrase(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "should create an account with from an existing seed for testnet",
+			name: "should create an Account with from an existing seed for testnet",
 			fields: fields{
-				NetworkByte: TestNetByte,
+				Network: NetworkTest,
 			},
 			args: args{
-				phrase: []byte("manage manual recall harvest series desert melt police rose hollow moral pledge kitten position add"),
+				Seed: []byte("manage manual recall harvest series desert melt police rose hollow moral pledge kitten position add"),
 			},
 			want: &Account{
 				Address: crypto.Base58Decode("3MyuPwbiobZFnZzrtyY8pkaHoQHYmyQxxY1"),
@@ -120,10 +126,11 @@ func TestLTO_CreateAccountFromExistingPhrase(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			lto, err := NewLTO(tt.fields.NetworkByte, "")
+			lto, err := NewClient().WithNetwork(tt.fields.Network).Create()
 			require.NoError(t, err)
 
-			got, err := lto.CreateAccountFromExistingPhrase(tt.args.phrase)
+			got, err := lto.NewAccount().FromSeed(tt.args.Seed).Create()
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CreateAccountFromExistingPhrase() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -139,7 +146,7 @@ func TestLTO_CreateAccountFromExistingPhrase(t *testing.T) {
 
 func TestLTO_CreateAccountFromPrivateKey(t *testing.T) {
 	type fields struct {
-		NetworkByte byte
+		Network Network
 	}
 	type args struct {
 		privateKey []byte
@@ -152,9 +159,9 @@ func TestLTO_CreateAccountFromPrivateKey(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "should create an account with from an existing private key",
+			name: "should create an Account with from an existing private key",
 			fields: fields{
-				NetworkByte: MainNetByte,
+				Network: NetworkMain,
 			},
 			args: args{
 				privateKey: crypto.Base58Decode("wJ4WH8dD88fSkNdFQRjaAhjFUZzZhV5yiDLDwNUnp6bYwRXrvWV8MJhQ9HL9uqMDG1n7XpTGZx7PafqaayQV8Rp"),
@@ -170,12 +177,12 @@ func TestLTO_CreateAccountFromPrivateKey(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			lto, err := NewLTO(tt.fields.NetworkByte, "")
+			lto, err := NewClient().WithNetwork(tt.fields.Network).Create()
 			require.NoError(t, err)
 
-			got, err := lto.CreateAccountFromPrivateKey(tt.args.privateKey)
+			got, err := lto.NewAccount().FromPrivateKey(tt.args.privateKey).Create()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("CreateAccountFromExistingPhrase() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("CreateAccountFromPrivateKey() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
@@ -188,8 +195,8 @@ func TestLTO_CreateAccountFromPrivateKey(t *testing.T) {
 
 func TestLTO_CreateEventChainID(t *testing.T) {
 	type fields struct {
-		NetworkByte byte
-		Random      io.Reader
+		Network Network
+		Random  io.Reader
 	}
 	type args struct {
 		publicSignKey []byte
@@ -203,10 +210,10 @@ func TestLTO_CreateEventChainID(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "should generate a correct event chain id without a nonce",
+			name: "should generate a correct Event chain id without a nonce",
 			fields: fields{
-				NetworkByte: MainNetByte,
-				Random:      bytes.NewReader(make([]byte, 20)),
+				Network: NetworkMain,
+				Random:  bytes.NewReader(make([]byte, 20)),
 			},
 			args: args{
 				publicSignKey: crypto.Base58Decode("8MeRTc26xZqPmQ3Q29RJBwtgtXDPwR7P9QNArymjPLVQ"),
@@ -216,10 +223,10 @@ func TestLTO_CreateEventChainID(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "should generate a correct event chain id with a nonce given",
+			name: "should generate a correct Event chain id with a nonce given",
 			fields: fields{
-				NetworkByte: MainNetByte,
-				Random:      cryptorand.Reader,
+				Network: NetworkMain,
+				Random:  cryptorand.Reader,
 			},
 			args: args{
 				publicSignKey: crypto.Base58Decode("8MeRTc26xZqPmQ3Q29RJBwtgtXDPwR7P9QNArymjPLVQ"),
@@ -231,10 +238,11 @@ func TestLTO_CreateEventChainID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			oldRand := rand
-			rand = tt.fields.Random
+			oldRand := Rand
+			Rand = tt.fields.Random
+			defer func() { Rand = oldRand }()
 
-			lto, err := NewLTO(tt.fields.NetworkByte, "")
+			lto, err := NewClient().WithNetwork(tt.fields.Network).Create()
 			require.NoError(t, err)
 
 			got, err := lto.CreateEventChainID(tt.args.publicSignKey, tt.args.nonce)
@@ -243,15 +251,13 @@ func TestLTO_CreateEventChainID(t *testing.T) {
 			} else if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CreateEventChainID() got = %v, want %v", got, tt.want)
 			}
-
-			rand = oldRand
 		})
 	}
 }
 
 func TestLTO_IsValidAddress(t *testing.T) {
 	type fields struct {
-		NetworkByte byte
+		Network Network
 	}
 	type args struct {
 		address []byte
@@ -265,7 +271,7 @@ func TestLTO_IsValidAddress(t *testing.T) {
 		{
 			name: "should return true for a valid address",
 			fields: fields{
-				NetworkByte: MainNetByte,
+				Network: NetworkMain,
 			},
 			args: args{
 				address: crypto.Base58Decode("3JmCa4jLVv7Yn2XkCnBUGsa7WNFVEMxAfWe"),
@@ -275,7 +281,7 @@ func TestLTO_IsValidAddress(t *testing.T) {
 		{
 			name: "should return false for an invalid address",
 			fields: fields{
-				NetworkByte: MainNetByte,
+				Network: NetworkMain,
 			},
 			args: args{
 				address: crypto.Base58Decode("3JmCa4jLVv7Yn2XkCnBUGsa7WNFVEMxAfW1"),
@@ -285,7 +291,7 @@ func TestLTO_IsValidAddress(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			lto, err := NewLTO(tt.fields.NetworkByte, "")
+			lto, err := NewClient().WithNetwork(tt.fields.Network).Create()
 			require.NoError(t, err)
 
 			if got := lto.IsValidAddress(tt.args.address); got != tt.want {

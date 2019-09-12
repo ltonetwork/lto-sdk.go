@@ -1,18 +1,14 @@
-package api
+package lto
 
 import (
 	"context"
 	"fmt"
 
-	cryptorand "crypto/rand"
-
 	"github.com/ltonetwork/lto-sdk.go/pkg/crypto"
 	"github.com/unchainio/pkg/xapi"
 )
 
-var rand = cryptorand.Reader
-
-func NewAPI(config *LTOConfig) (*API, error) {
+func NewAPI(config *Config) (*API, error) {
 	client, err := xapi.NewClient(config.NodeAddress)
 	if err != nil {
 		return nil, err
@@ -26,7 +22,7 @@ func NewAPI(config *LTOConfig) (*API, error) {
 
 type API struct {
 	client *xapi.Client
-	config *LTOConfig
+	config *Config
 }
 
 type balanceResponse struct {

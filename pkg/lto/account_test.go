@@ -1,9 +1,11 @@
-package api
+package lto_test
 
 import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/ltonetwork/lto-sdk.go/pkg/lto"
 
 	"github.com/ltonetwork/lto-sdk.go/pkg/crypto"
 
@@ -12,8 +14,7 @@ import (
 
 func TestAccount_GetEncodedPhrase(t *testing.T) {
 	type args struct {
-		phrase      []byte
-		networkByte byte
+		Seed []byte
 	}
 	tests := []struct {
 		name    string
@@ -24,8 +25,7 @@ func TestAccount_GetEncodedPhrase(t *testing.T) {
 		{
 			name: "should return a correct base58 encoded phrase",
 			args: args{
-				phrase:      []byte("satisfy sustain shiver skill betray mother appear pupil coconut weasel firm top puzzle monkey seek"),
-				networkByte: 0,
+				Seed: []byte("satisfy sustain shiver skill betray mother appear pupil coconut weasel firm top puzzle monkey seek"),
 			},
 			want:    "EMJxAXyrymyGv1fjRyx9uptWC3Ck5AXxtZbXXv59iDjmV2rQsLmbMmw5DBf1GrjhP9VbE7Dy8wa8VstVnJsXiCDBjJhvUVhyE1wnwA1h9Hdg3wg1V6JFJfszZJ4SxYSuNLQven",
 			wantErr: false,
@@ -33,7 +33,7 @@ func TestAccount_GetEncodedPhrase(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			account, err := NewAccount(tt.args.phrase, tt.args.networkByte)
+			account, err := lto.NewAccount().FromSeed(tt.args.Seed).Create()
 			require.NoError(t, err)
 
 			got := account.GetEncodedPhrase()
@@ -46,9 +46,8 @@ func TestAccount_GetEncodedPhrase(t *testing.T) {
 
 func TestAccount_SignMessage(t *testing.T) {
 	type fields struct {
-		Sign        *crypto.KeyPair
-		phrase      []byte
-		NetworkByte byte
+		Sign *crypto.KeyPair
+		Seed []byte
 	}
 	type args struct {
 		message []byte
@@ -75,10 +74,9 @@ func TestAccount_SignMessage(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "should generate a correct signature from a message with a seeded account",
+			name: "should generate a correct signature from a message with a seeded Account",
 			fields: fields{
-				phrase:      []byte("satisfy sustain shiver skill betray mother appear pupil coconut weasel firm top puzzle monkey seek"),
-				NetworkByte: 0,
+				Seed: []byte("satisfy sustain shiver skill betray mother appear pupil coconut weasel firm top puzzle monkey seek"),
 			},
 			args: args{
 				message: []byte("hello"),
@@ -90,18 +88,18 @@ func TestAccount_SignMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var err error
-			var account *Account
+			ap := lto.NewAccount()
 
-			if len(tt.fields.phrase) != 0 {
-				account, err = NewAccount(tt.fields.phrase, tt.fields.NetworkByte)
-				require.NoError(t, err)
-			} else {
-				account = &Account{
-					Sign: tt.fields.Sign,
-				}
+			if len(tt.fields.Seed) != 0 {
+				ap.FromSeed(tt.fields.Seed)
+			} else if tt.fields.Sign != nil {
+				ap.FromPrivateKey(tt.fields.Sign.PrivateKey)
 			}
 
-			got, err := account.SignMessage(tt.args.message)
+			a, err := ap.Create()
+			require.NoError(t, err)
+
+			got, err := a.SignMessage(tt.args.message)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SignMessage() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -114,7 +112,7 @@ func TestAccount_SignMessage(t *testing.T) {
 }
 
 func TestAccount_SignEvent(t *testing.T) {
-	time1, err := time.Parse(TimeFormat, "2018-03-01T00:00:00+00:00")
+	time1, err := time.Parse(lto.TimeFormat, "2018-03-01T00:00:00+00:00")
 	require.NoError(t, err)
 
 	type fields struct {
@@ -123,17 +121,17 @@ func TestAccount_SignEvent(t *testing.T) {
 		Sign    *crypto.KeyPair
 	}
 	type args struct {
-		event *Event
+		event *lto.Event
 	}
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
-		want    *Event
+		want    *lto.Event
 		wantErr bool
 	}{
 		{
-			name: "should create a correct signature for an event",
+			name: "should create a correct signature for an Event",
 			fields: fields{
 				Sign: &crypto.KeyPair{
 					PublicKey:  crypto.Base58Decode("FkU1XyfrCftc4pQKXCrrDyRLSnifX1SMvmx1CYiiyB3Y"),
@@ -141,14 +139,14 @@ func TestAccount_SignEvent(t *testing.T) {
 				},
 			},
 			args: args{
-				event: &Event{
+				event: &lto.Event{
 					Body:      "HeFMDcuveZQYtBePVUugLyWtsiwsW4xp7xKdv",
 					Timestamp: time1.Unix(),
 					Previous:  "72gRWx4C1Egqz9xvUBCYVdgh7uLc5kmGbjXFhiknNCTW",
 					SignKey:   crypto.Base58Decode("FkU1XyfrCftc4pQKXCrrDyRLSnifX1SMvmx1CYiiyB3Y"),
 				},
 			},
-			want: &Event{
+			want: &lto.Event{
 				Signature: crypto.Base58Decode("258KnaZxcx4cA9DUWSPw8QwBokRGzFDQmB4BH9MRJhoPJghsXoAZ7KnQ2DWR7ihtjXzUjbsXtSeup4UDcQ2L6RDL"),
 				Hash:      "Bpq9rZt12Gv44dkXFw8RmLYzbaH2HBwPQJ6KihdLe5LG",
 			},
@@ -157,9 +155,9 @@ func TestAccount_SignEvent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a := &Account{
-				Sign: tt.fields.Sign,
-			}
+			a, err := lto.NewAccount().FromPrivateKey(tt.fields.Sign.PrivateKey).Create()
+			require.NoError(t, err)
+
 			got, err := a.SignEvent(tt.args.event)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SignEvent() error = %v, wantErr %v", err, tt.wantErr)
@@ -176,9 +174,8 @@ func TestAccount_SignEvent(t *testing.T) {
 
 func TestAccount_Verify(t *testing.T) {
 	type fields struct {
-		Sign        *crypto.KeyPair
-		phrase      []byte
-		networkByte byte
+		Sign *crypto.KeyPair
+		Seed []byte
 	}
 	type args struct {
 		signature []byte
@@ -207,10 +204,9 @@ func TestAccount_Verify(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "should verify a correct signature with seeded account to be true",
+			name: "should verify a correct signature with seeded Account to be true",
 			fields: fields{
-				phrase:      []byte("satisfy sustain shiver skill betray mother appear pupil coconut weasel firm top puzzle monkey seek"),
-				networkByte: 0,
+				Seed: []byte("satisfy sustain shiver skill betray mother appear pupil coconut weasel firm top puzzle monkey seek"),
 			},
 			args: args{
 				signature: crypto.Base58Decode("2SPPcJzvJHTNJWjzWLWDaaiZap61L5EwhPY9fRjLTqGebDuqoCuqGCVTTQVyAiMAeffuNXbR8oBNRdauSr63quhn"),
@@ -238,24 +234,101 @@ func TestAccount_Verify(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var err error
-			var account *Account
+			ap := lto.NewAccount()
 
-			if len(tt.fields.phrase) != 0 {
-				account, err = NewAccount(tt.fields.phrase, tt.fields.networkByte)
-				require.NoError(t, err)
-			} else {
-				account = &Account{
-					Sign: tt.fields.Sign,
-				}
+			if len(tt.fields.Seed) != 0 {
+				ap.FromSeed(tt.fields.Seed)
+			} else if tt.fields.Sign != nil {
+				ap.FromPrivateKey(tt.fields.Sign.PrivateKey)
 			}
 
-			got, err := account.Verify(tt.args.signature, tt.args.message)
+			a, err := ap.Create()
+			require.NoError(t, err)
+
+			got, err := a.Verify(tt.args.signature, tt.args.message)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Verify() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
 				t.Errorf("Verify() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAccount_CreateEventChain(t *testing.T) {
+	type fields struct {
+		Address []byte
+		Seed    []byte
+		Sign    *crypto.KeyPair
+	}
+	type args struct {
+		nonce []byte
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *lto.EventChain
+		wantErr bool
+	}{
+		{
+			name: "should create an event chain with a random nonce",
+			fields: fields{
+				Address: nil,
+				Seed:    nil,
+				Sign: &crypto.KeyPair{
+					PublicKey:  crypto.Base58Decode("FkU1XyfrCftc4pQKXCrrDyRLSnifX1SMvmx1CYiiyB3Y"),
+					PrivateKey: crypto.Base58Decode("wJ4WH8dD88fSkNdFQRjaAhjFUZzZhV5yiDLDwNUnp6bYwRXrvWV8MJhQ9HL9uqMDG1n7XpTGZx7PafqaayQV8Rp"),
+				},
+			},
+			args: args{
+				nonce: nil,
+			},
+			want: &lto.EventChain{
+				ID:     nil,
+				Events: nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: "should create an Account with a predefined nonce",
+			fields: fields{
+				Address: nil,
+				Seed:    nil,
+				Sign: &crypto.KeyPair{
+					PublicKey:  crypto.Base58Decode("FkU1XyfrCftc4pQKXCrrDyRLSnifX1SMvmx1CYiiyB3Y"),
+					PrivateKey: crypto.Base58Decode("wJ4WH8dD88fSkNdFQRjaAhjFUZzZhV5yiDLDwNUnp6bYwRXrvWV8MJhQ9HL9uqMDG1n7XpTGZx7PafqaayQV8Rp"),
+				},
+			},
+			args: args{
+				nonce: []byte("10"),
+			},
+			want: &lto.EventChain{
+				ID:     crypto.Base58Decode("2bGCW3XbfLmSRhotYzcUgqiomiiFLKtXeQ1sYC5A5tpKL4TkDkqx9nWT1yB8Uc"),
+				Events: nil,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a, err := lto.NewAccount().FromPrivateKey(tt.fields.Sign.PrivateKey).Create()
+			require.NoError(t, err)
+
+			got, err := a.CreateEventChain(tt.args.nonce)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CreateEventChain() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if err == nil {
+				if tt.want.ID != nil {
+					require.Equal(t, got.ID, tt.want.ID)
+				} else {
+					require.NotNil(t, got.ID)
+				}
 			}
 		})
 	}
