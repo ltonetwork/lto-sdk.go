@@ -56,9 +56,6 @@ func TestAPI_Balance(t *testing.T) {
 
 			spew.Dump(crypto.Base58Encode(got.Address))
 			spew.Dump(got)
-			//if !reflect.DeepEqual(got, tt.want) {
-			//	t.Errorf("AddressBalance() got = %v, want %v", got, tt.want)
-			//}
 		})
 	}
 }
@@ -109,9 +106,6 @@ func TestAPI_BalanceWithConfirmations(t *testing.T) {
 
 			spew.Dump(crypto.Base58Encode(got.Address))
 			spew.Dump(got)
-			//if !reflect.DeepEqual(got, tt.want) {
-			//	t.Errorf("AddressBalance() got = %v, want %v", got, tt.want)
-			//}
 		})
 	}
 }
@@ -162,9 +156,6 @@ func TestAPI_BalanceDetails(t *testing.T) {
 
 			spew.Dump(crypto.Base58Encode(got.Address))
 			spew.Dump(got)
-			//if !reflect.DeepEqual(got, tt.want) {
-			//	t.Errorf("AddressBalance() got = %v, want %v", got, tt.want)
-			//}
 		})
 	}
 }

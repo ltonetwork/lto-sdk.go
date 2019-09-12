@@ -1,8 +1,9 @@
 package lto
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 type UtilsTimeResponse struct {
@@ -16,7 +17,7 @@ func (api *API) UtilsTime() (*UtilsTimeResponse, error) {
 	path := fmt.Sprintf("/utils/time")
 	r, err := api.client.R().SetResult(res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get time")
 	}
 
 	if r.IsError() {
@@ -42,7 +43,7 @@ func (api *API) UtilsCompile(code string) (string, error) {
 	r, err := api.client.R().SetBody(code).SetResult(res).Post(path)
 
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "failed to compile script")
 	}
 
 	if r.IsError() {

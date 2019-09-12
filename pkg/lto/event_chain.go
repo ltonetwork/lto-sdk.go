@@ -1,9 +1,8 @@
 package lto
 
 import (
-	"errors"
-
 	"github.com/ltonetwork/lto-sdk.go/pkg/crypto"
+	"github.com/pkg/errors"
 )
 
 type eventChainParams struct {

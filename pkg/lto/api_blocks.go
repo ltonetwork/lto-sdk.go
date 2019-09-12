@@ -41,7 +41,7 @@ func (api *API) BlocksGet(signature string) (*BlocksGetResponse, error) {
 	path := fmt.Sprintf("/blocks/signature/%s", signature)
 	r, err := api.client.R().SetResult(res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get block")
 	}
 
 	if r.IsError() {
@@ -57,7 +57,7 @@ func (api *API) BlocksAt(height int64) (*BlocksGetResponse, error) {
 	path := fmt.Sprintf("/blocks/at/%d", height)
 	r, err := api.client.R().SetResult(res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get block")
 	}
 
 	if r.IsError() {
@@ -73,7 +73,7 @@ func (api *API) BlocksFirst() (*BlocksGetResponse, error) {
 	path := fmt.Sprintf("/blocks/first")
 	r, err := api.client.R().SetResult(res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get block")
 	}
 
 	if r.IsError() {
@@ -89,7 +89,7 @@ func (api *API) BlocksLast() (*BlocksGetResponse, error) {
 	path := fmt.Sprintf("/blocks/last")
 	r, err := api.client.R().SetResult(res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get block")
 	}
 
 	if r.IsError() {
@@ -109,7 +109,7 @@ func (api *API) BlocksHeight() (*BlocksHeightResponse, error) {
 	path := fmt.Sprintf("/blocks/height")
 	r, err := api.client.R().SetResult(res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get block")
 	}
 
 	if r.IsError() {

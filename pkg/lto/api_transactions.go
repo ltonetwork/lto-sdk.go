@@ -23,10 +23,8 @@ func (api *API) TransactionsGet(id string) (*TransactionsGetResponse, error) {
 	path := fmt.Sprintf("/transactions/info/%s", id)
 	r, err := api.client.R().SetResult(res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get transaction")
 	}
-
-	fmt.Printf("%s\n", string(r.Body()))
 
 	if r.IsError() {
 		return nil, errors.New(string(r.Body()))
@@ -61,7 +59,7 @@ func (api *API) TransactionsGetList(address string, limit int) ([][]*Transaction
 	path := fmt.Sprintf("/transactions/address/%s/limit/%d", address, limit)
 	r, err := api.client.R().SetResult(&res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get transaction")
 	}
 
 	if r.IsError() {
@@ -81,10 +79,8 @@ func (api *API) TransactionsUTXSize() (*TransactionsUTXSizeResponse, error) {
 	path := fmt.Sprintf("/transactions/unconfirmed/size")
 	r, err := api.client.R().SetResult(&res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get transaction")
 	}
-
-	fmt.Printf("%s\n", string(r.Body()))
 
 	if r.IsError() {
 		return nil, errors.New(string(r.Body()))
@@ -99,10 +95,8 @@ func (api *API) TransactionsUTXGet(id string) (*TransactionsGetResponse, error) 
 	path := fmt.Sprintf("/transactions/unconfirmed/info/%s", id)
 	r, err := api.client.R().SetResult(&res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get transaction")
 	}
-
-	fmt.Printf("%s\n", string(r.Body()))
 
 	if r.IsError() {
 		return nil, errors.New(string(r.Body()))
@@ -117,10 +111,8 @@ func (api *API) TransactionsUTXGetList() ([][]*TransactionsGetListResponseItem, 
 	path := fmt.Sprintf("/transactions/unconfirmed")
 	r, err := api.client.R().SetResult(&res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get transaction")
 	}
-
-	fmt.Printf("%s\n", string(r.Body()))
 
 	if r.IsError() {
 		return nil, errors.New(string(r.Body()))

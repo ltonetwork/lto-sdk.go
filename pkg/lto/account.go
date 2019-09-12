@@ -5,8 +5,6 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
-
 	"github.com/ltonetwork/lto-sdk.go/pkg/crypto"
 	"github.com/pkg/errors"
 )
@@ -64,7 +62,7 @@ func (p *accountParams) Create() (*Account, error) {
 		return newAccountFromSeed(seed, p.networkConfig)
 	}
 
-	return nil, nil
+	return nil, errors.New("no method specified for generating the private key")
 }
 
 func newAccountFromSeed(seed []byte, networkConfig *Config) (*Account, error) {
@@ -104,8 +102,6 @@ func (p *accountParams) FromRandom() *accountParams {
 
 func (p *accountParams) FromRandomN(n int) *accountParams {
 	p.randomWordN = n
-
-	spew.Dump(p.randomWordN)
 
 	return p
 }
@@ -196,7 +192,7 @@ func (a *Account) SignMessage(message []byte) ([]byte, error) {
 	return crypto.CreateSignature(message, a.Sign.PrivateKey)
 }
 
-func (a *Account) GetNonce() ([]byte, error) {
+func (a *Account) GetRandomNonce() ([]byte, error) {
 	bytes := make([]byte, 24)
 	_, err := Rand.Read(bytes)
 	if err != nil {

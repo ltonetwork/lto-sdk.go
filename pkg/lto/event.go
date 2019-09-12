@@ -2,11 +2,11 @@ package lto
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/ltonetwork/lto-sdk.go/pkg/crypto"
+	"github.com/pkg/errors"
 )
 
 const TimeFormat = "2006-01-02T15:04:05-07:00"

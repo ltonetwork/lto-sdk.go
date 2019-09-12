@@ -10,13 +10,10 @@ import (
 )
 
 func BuildNACLSignKeyPair(seed []byte) (*KeyPair, error) {
-	//fmt.Printf("seedBytes = ('%v')\n", seed)
-
 	seedHash, err := buildSeedHash(seed)
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Printf("seedHash = ('%v')\n", seedHash)
 
 	privateKey := ed25519.NewKeyFromSeed(seedHash)
 
@@ -39,10 +36,8 @@ func buildSeedHash(seed []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Printf("nonce = ('%v')\n", nonce.Bytes())
 
 	seedBytesWithNonce := append(nonce.Bytes(), seed...)
-	//fmt.Printf("seedBytesWithNonce = ('%v')\n", seedBytesWithNonce)
 
 	seedHash := hashChain(seedBytesWithNonce)
 	return Sha256(seedHash), nil
@@ -57,14 +52,8 @@ func hashChain(input []byte) []byte {
 func BuildRawAddress(publicKeyBytes []byte, networkByte byte) []byte {
 	prefix := []byte{AddressVersion, networkByte}
 	publicKeyHashPart := hashChain(publicKeyBytes)
-	//fmt.Printf("hashChain('%v') = '%v'\n", Base58Encode(publicKeyBytes), Base58Encode(publicKeyHashPart))
 	publicKeyHashPart = publicKeyHashPart[0:20]
 	rawAddress := append(prefix, publicKeyHashPart...)
-	//fmt.Printf("publicKeyBytes = ('%v')\n", publicKeyBytes)
-	//fmt.Printf("hashChain(publicKeyBytes) = ('%v')\n", hashChain(publicKeyBytes))
-	//fmt.Printf("prefix = ('%v')\n", prefix)
-	//fmt.Printf("publicKeyHashPart = ('%v')\n", publicKeyHashPart)
-	//fmt.Printf("rawAddress = ('%v')\n", rawAddress)
 	addressHash := hashChain(rawAddress)[0:4]
 
 	return append(rawAddress, addressHash...)

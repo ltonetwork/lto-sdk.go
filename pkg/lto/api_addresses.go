@@ -25,9 +25,8 @@ func (api *API) AddressBalance(address []byte) (*BalanceResponse, error) {
 
 	path := fmt.Sprintf("/addresses/balance/%s", addressString)
 	r, err := api.client.R().SetResult(res).Get(path)
-
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get balance")
 	}
 
 	if r.IsError() {
@@ -48,7 +47,7 @@ func (api *API) AddressBalanceWithConfirmations(address []byte, confirmations in
 	path := fmt.Sprintf("/addresses/balance/%s/%d", addressString, confirmations)
 	r, err := api.client.R().SetResult(res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get balance")
 	}
 
 	if r.IsError() {
@@ -85,7 +84,7 @@ func (api *API) AddressBalanceDetails(address []byte) (*BalanceDetailsResponse, 
 	path := fmt.Sprintf("/addresses/balance/details/%s", addressString)
 	r, err := api.client.R().SetResult(res).Get(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get balance details")
 	}
 
 	if r.IsError() {
