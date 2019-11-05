@@ -50,8 +50,8 @@ func (p *eventChainParams) WithNonce(nonce []byte) *eventChainParams {
 }
 
 type EventChain struct {
-	ID     []byte
-	Events []*Event
+	ID     []byte   `json:"id"`
+	Events []*Event `json:"events"`
 }
 
 const EventChainVersion byte = 0x40

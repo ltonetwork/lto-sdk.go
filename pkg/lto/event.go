@@ -76,37 +76,37 @@ type Event struct {
 	 * Base58 encoded JSON string with the body of the Event.
 	 *
 	 */
-	Body string
+	Body string `json:"body"`
 
 	/**
 	 * Time when the Event was signed.
 	 *
 	 */
-	Timestamp int64
+	Timestamp int64 `json:"timestamp"`
 
 	/**
 	 * Hash to the previous Event
 	 *
 	 */
-	Previous string
+	Previous string `json:"previous"`
 
 	/**
 	 * URI of the public key used to sign the Event
 	 *
 	 */
-	SignKey []byte
+	SignKey []byte `json:"signKey"`
 
 	/**
 	 * Base58 encoded signature of the Event
 	 *
 	 */
-	Signature []byte
+	Signature []byte `json:"signature"`
 
 	/**
 	 * Base58 encoded SHA256 hash of the Event
 	 *
 	 */
-	Hash string
+	Hash string `json:"hash"`
 }
 
 func (e *Event) GetHash() (string, error) {
